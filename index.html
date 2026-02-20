@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Generation Brasil">
+    <meta 
+        name="description"
+        content="Portfólio da Generation Brasil, 
+                desenvolvedor Full Stack especializado em criar experiências 
+                digitais incríveis. Conheça meus projetos e entre em contato."
+    >
+    <meta name="robots" content="index, follow">
+
+    <link rel="icon" type="image/svg+xml" href="./assets/img/favicon.svg">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+
+    <title>LOG Anonymizer</title>
+</head>
+
+
+<body>
+
+<div class="grid-bg"></div>
+<div class="container">
+
+<header>
+  <div class="tag">// data privacy · LGPD compliant</div>
+  <h1>Log Anonymizer</h1>
+  <p>Padronização, limpeza e anonimização de logs CSV/TXT conforme LGPD e boas práticas de segurança de dados.</p>
+  <div class="badges">
+    <span class="badge badge-g">PascalCase Headers</span>
+    <span class="badge badge-g">Separador ;</span>
+    <span class="badge badge-g">Não Informado</span>
+    <span class="badge badge-g">Deduplicação</span>
+    <span class="badge badge-p">PATH_REDACTED</span>
+    <span class="badge badge-r">LGPD</span>
+    <span class="badge badge-r">Validação Amostral</span>
+  </div>
+</header>
+
+<!-- 01 Upload -->
+<div class="card" id="step1">
+  <div class="card-title">01 — Arquivo CSV/TXT</div>
+  <div class="row">
+    <div>
+      <label class="small">Separador de entrada</label>
+      <select id="sep">
+        <option value=",">, (vírgula)</option>
+        <option value=";" selected>; (ponto-e-vírgula)</option>
+        <option value="\t">Tab</option>
+        <option value="|">| (pipe)</option>
+      </select>
+    </div>
+    <div>
+      <label class="small">Codificação <span id="encDetected" style="color:var(--accent);font-size:10px;margin-left:6px"></span></label>
+      <select id="enc">
+        <option value="auto" selected>Auto-detectar</option>
+        <option value="UTF-8">UTF-8</option>
+        <option value="windows-1252">Windows-1252 / Latin-1</option>
+        <option value="ISO-8859-1">ISO-8859-1</option>
+      </select>
+    </div>
+  </div>
+  <div class="drop-zone" id="dropZone">
+    <input type="file" id="fileInput" accept=".csv,.txt,.log">
+    <span class="icon">📂</span>
+    <p><strong>Arraste um arquivo CSV ou LOG (.txt/.log) aqui</strong><br>ou clique para selecionar</p>
+  </div>
+  <div class="file-info" id="fileInfo">
+    <span class="fname" id="fileName"></span>
+    <span class="fsize" id="fileSize"></span>
+    <button class="btn btn-secondary" onclick="clearFile()" style="padding:5px 12px;font-size:11px">✕ Limpar</button>
+  </div>
+  <div class="status" id="uploadStatus"></div>
+</div>
+
+<!-- 02 Rules -->
+<div class="card" id="step2" style="display:none">
+  <div class="card-title">02 — Regras de Tratamento Aplicadas Automaticamente</div>
+  <div class="rules-grid">
+    <div class="rule-item"><strong>Cabeçalhos</strong>Convertidos para PascalCase (cada palavra em maiúscula, sem espaços)</div>
+    <div class="rule-item"><strong>Separador de saída</strong>Sempre ; (ponto-e-vírgula) — pronto para análise de IA</div>
+    <div class="rule-item"><strong>Valores ausentes</strong>Preenchidos com "Não informado"</div>
+    <div class="rule-item"><strong>Deduplicação</strong>Linhas idênticas removidas automaticamente</div>
+    <div class="rule-item"><strong>Colunas</strong>Cada linha normalizada com o mesmo número de colunas</div>
+    <div class="rule-item"><strong>Decimal</strong>Vírgula como separador decimal (padrão PT-BR)</div>
+    <div class="rule-item"><strong>IPs / E-mails</strong>→ IP_GERAL / EMAIL_GERAL em qualquer célula</div>
+    <div class="rule-item"><strong>CPF / CNPJ</strong>→ CPF_GERAL / CNPJ_GERAL em qualquer célula</div>
+    <div class="rule-item"><strong>Domínios / URLs</strong>→ DOMINIO_GERAL</div>
+    <div class="rule-item"><strong>Usuários / Nomes</strong>→ Usuario_N (pseudônimo consistente)</div>
+    <div class="rule-item"><strong>Empresas</strong>→ Empresa_N (pseudônimo consistente)</div>
+    <div class="rule-item"><strong>Caminhos internos</strong>→ [PATH_REDACTED] (Unix e Windows)</div>
+    <div class="rule-item"><strong>Servidores internos</strong>→ [SERVER_REDACTED]</div>
+    <div class="rule-item"><strong>Serviços Afetados</strong>Coluna preservada com sanitização inline</div>
+    <div class="rule-item"><strong>Detalhes / Feedback</strong>Preservados, mas com dados sensíveis anonimizados</div>
+    <div class="rule-item"><strong>LGPD</strong>Nenhum dado pessoal identificável no output</div>
+  </div>
+</div>
+
+<!-- 03 Column config -->
+<div class="card" id="step3" style="display:none">
+  <div class="card-title">03 — Configuração de Colunas</div>
+  <p style="font-size:11px;color:var(--muted);margin-bottom:16px">
+    Cabeçalhos convertidos para PascalCase. Defina o tratamento adicional de cada coluna.<br>
+    Colunas de feedback, detalhes e serviços afetados passam por sanitização automática mesmo no modo "Manter".
+  </p>
+  <div class="columns-grid" id="columnsGrid"></div>
+  <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+    <div class="actions">
+      <button class="btn btn-secondary" onclick="autoDetect()">🔍 Auto-detectar</button>
+      <button class="btn btn-secondary" onclick="selectAll('pseudonym')">Pseudônimo em todas</button>
+      <button class="btn btn-secondary" onclick="selectAll('sanitize')">Sanitizar em todas</button>
+      <button class="btn btn-secondary" onclick="selectAll('keep')">Manter (com sanitização)</button>
+    </div>
+  </div>
+</div>
+
+<!-- 04 Preview -->
+<div class="card" id="step4" style="display:none">
+  <div class="card-title">04 — Pré-visualização</div>
+  <div class="preview-wrap"><table id="previewTable"></table></div>
+  <p style="font-size:10px;color:var(--muted);margin-top:10px">
+    Até 10 linhas ·
+    <span style="color:var(--accent2)">■</span> anonimizado/substituído ·
+    <span style="color:var(--warn)">■</span> preenchido com "Não informado"
+  </p>
+</div>
+
+<!-- 05 Export -->
+<div class="card" id="step5" style="display:none">
+  <div class="card-title">05 — Validação &amp; Exportar</div>
+  <div class="stats" id="statsBar"></div>
+  <div class="validation-list" id="validationList"></div>
+  <div class="actions" style="margin-top:24px">
+    <button class="btn btn-primary" id="btnProcess" onclick="processAndDownload()">⬇ Processar &amp; Baixar CSV</button>
+    <button class="btn btn-secondary" onclick="runValidation()">🔬 Validar Amostra</button>
+    <button class="btn btn-secondary" onclick="copyPreview()">Copiar prévia (;)</button>
+  </div>
+  <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="status" id="exportStatus"></div>
+</div>
+
+</div><!-- /container -->
+
+    <script src="./assets/js/scripts.js"></script>
+</body>
+
+</html>
