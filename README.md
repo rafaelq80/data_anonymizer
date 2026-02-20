@@ -1,6 +1,6 @@
 # Log Anonymizer
 
-## Padronização e Anonimização de dados em arquivos de LOG - CSV
+## Padronização e Anonimização de dados em arquivos de LOG - CSV/TXT
 
 <br />
 
